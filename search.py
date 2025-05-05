@@ -23,12 +23,14 @@ def search(something):
             if link_element:
                 # Extraer la URL
                 link = link_element.get('href')
+                # Extraer la carátula
+                image= link_element.find('img')['src']
                 # Extraer el título (está en h3)
                 title_element = link_element.find('h3', class_='Title')
                 if title_element:
                     title = title_element.text.strip()
                     # Añadir la información a la lista
-                    anime_info.append((title, link))
+                    anime_info.append((title, image, link))
         return anime_info
     else:
         return f"Error al cargar la página: {response.status_code}"
