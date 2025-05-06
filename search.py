@@ -35,8 +35,24 @@ def search(something):
     else:
         return f"Error al cargar la página: {response.status_code}"
     
-    
+def get_anime(anime_link):
+    response = requests.get("https://www3.animeflv.net"+anime_link)
+    if response.status_code==200:
+        # Crear el objeto BeautifulSoup
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        titulo=soup.find('h1', class_='Title').text.strip()
+        sinopsis=soup.find('div', class_='Description').text.strip()
+        valoracion=soup.find('span', class_='vtprmd').text.strip()
+        imagen="https://www3.animeflv.net"+soup.find('div', class_='Image').find('img')['src']
+        
+        return titulo, sinopsis, valoracion, imagen
+    else:
+        return f"Error al cargar la página: {response.status_code}"
+
 if __name__=="__main__":
     
     hola="a"
-    print(search(hola))
+    #print(search(hola))
+    
+    print(get_anime("/anime/lazarus"))
