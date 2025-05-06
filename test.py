@@ -1,23 +1,19 @@
-import flet as ft
 from search import search
+import flet as ft
 
 def main(page: ft.Page):
-    
     page.title = "AniPy"
-    
-    lista_resultados=ft.GridView(max_extent=250, child_aspect_ratio=0.67, spacing=10, run_spacing=10, expand=True)
-    
-    def algo(e):
-        print("Pulsado")
-    
-    def stuff(e):
-        # Limpia la lista de resultados
+    lista_resultados = ft.GridView(max_extent=250, child_aspect_ratio=0.67, spacing=10, run_spacing=10, expand=True)
+
+    def ver_anime(e):
+        page.client_storage.set("anime_link", e.control.data)
+        page.go("/detalle")
+
+    def buscar(e):
         lista_resultados.controls.clear()
-        # Busca el contenido del textfield
-        resultados=search(textfield.value)
-        
+        resultados = search(textfield.value)
         for titulo, imagen, url in resultados:
-            results_card=ft.Card(
+            results_card = ft.Card(
                 content=ft.Container(
                     content=ft.Column(
                         controls=[
@@ -27,30 +23,38 @@ def main(page: ft.Page):
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER
                     ),
                     padding=5,
-                    on_click=algo
+                    on_click=ver_anime,
+                    data=url
                 ),
                 elevation=2
             )
             lista_resultados.controls.append(results_card)
         page.update()
-    
-    textfield=ft.TextField(label="Busca algo")
-    
+
+    textfield = ft.TextField(label="Busca algo")
+
     things = ft.Container(
         content=ft.Column(
             controls=[
                 ft.Row(
                     controls=[
                         textfield,
-                        ft.Button("Algo", on_click=stuff),
+                        ft.ElevatedButton("Buscar", on_click=buscar),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER
                 ),
-                
             ]
         ),
     )
-    
+
+    def route_change(route):
+        if page.route == "/detalle":
+            from test2 import detalle_view
+            page.views.clear()
+            page.views.append(detalle_view(page))
+            page.update()
+
+    page.on_route_change = route_change
     page.add(things, lista_resultados)
-    
+
 ft.app(main)
