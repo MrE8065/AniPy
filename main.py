@@ -1,53 +1,81 @@
-import os
-import time
-from search import search
-from anime import handle_anime
+from get import search
+import flet as ft
 
-os.system('cls' if os.name == 'nt' else 'clear')
+def main(page: ft.Page):
+    page.title = "AniPy"
+    lista_resultados = ft.GridView(max_extent=250, child_aspect_ratio=0.67, spacing=10, run_spacing=10, expand=True)
 
-print("""
-*-----------------------------------*
-|                                   |
-|                                   |
-|       ¡Bienvenid@ a AniPy!        |
-|                                   |
-|                                   |
-*-----------------------------------*
-""")
-anime = input("Escribe el anime que quieres ver: ")
-print(f"Buscando {anime}...")
-time.sleep(1)
-os.system('cls' if os.name == 'nt' else 'clear')
-resultados = search(anime)
+    def ver_anime(e):
+        page.client_storage.set("anime_link", e.control.data)
+        page.go("/detalle")
 
-# Verificar si hay resultados y son del tipo esperado (lista)
-if resultados and isinstance(resultados, list):
-    print("Resultados encontrados:")
-    print("-" * 40)
-    # Mostrar solo los títulos, enumerados
-    for i, (titulo, _) in enumerate(resultados, 1):
-        print(f"{i}. {titulo}")
-    print("-" * 40)
-    
-    # Opcional: Mostrar cantidad de resultados
-    print(f"\nSe encontraron {len(resultados)} resultados para '{anime}'")
-    
-    # Opcional: Permitir seleccionar un anime para ver más detalles
-    if len(resultados) > 0:
-        try:
-            seleccion = int(input("\n¿Qué anime quieres ver? (Ingresa el número o 0 para salir): "))
-            if 1 <= seleccion <= len(resultados):
-                titulo_seleccionado, enlace_seleccionado = resultados[seleccion-1]
-                os.system('cls' if os.name == 'nt' else 'clear')
-                print(f"Has seleccionado: {titulo_seleccionado}\n")
-                handle_anime(enlace_seleccionado,titulo_seleccionado)
-            elif seleccion == 0:
-                print("¡Hasta pronto!")
-            else:
-                print("Número inválido.")
-        except ValueError:
-            print("Por favor ingresa un número válido.")
-elif isinstance(resultados, str) and "Error" in resultados:
-    print(resultados)  # Muestra el mensaje de error
-else:
-    print("No se encontraron resultados para tu búsqueda.")
+    def buscar(e):
+        lista_resultados.controls.clear()
+        resultados = search(textfield.value)
+
+        if not resultados:
+            lista_resultados.controls.append(
+                ft.Text("No hay resultados", size=20, weight="bold", text_align=ft.TextAlign.CENTER)
+            )
+        else:
+            for titulo, imagen, url in resultados:
+                results_card = ft.Card(
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Image(src=imagen, width=150, height=250),
+                                ft.Text(titulo, weight="bold", width=170, overflow=ft.TextOverflow.ELLIPSIS, text_align=ft.TextAlign.CENTER, max_lines=3)
+                            ],
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        ),
+                        padding=5,
+                        on_click=ver_anime,
+                        data=url
+                    ),
+                    elevation=2
+                )
+                lista_resultados.controls.append(results_card)
+        page.update()
+
+    textfield = ft.TextField(label="Busca algo", on_submit=buscar)
+
+    things = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Row(
+                    controls=[textfield, ft.ElevatedButton("Buscar", on_click=buscar)],
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+            ]
+        ),
+        padding=10
+    )
+
+    def route_change(route):
+        page.views.clear()
+        if page.route == "/detalle":
+            from anime_view import detalle_view
+            page.views.append(detalle_view(page))
+        elif page.route == "/episodio":
+            from episode_view import video_view
+            page.views.append(video_view(page))
+        else:
+            page.views.append(
+                ft.View(
+                    "/",
+                    controls=[things, lista_resultados],
+                    scroll=ft.ScrollMode.AUTO
+                )
+            )
+        page.update()
+
+    def view_pop(view):
+        page.views.pop()
+        top_view = page.views[-1]
+        page.go(top_view.route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go("/")
+
+ft.app(main)
