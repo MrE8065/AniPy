@@ -2,7 +2,6 @@ import requests
 import re
 import html
 import importlib
-from player import start_player
 
 def get_url(url):
     response = requests.get(url)
@@ -30,7 +29,7 @@ def load_extractor(service_name):
     except ModuleNotFoundError:
         return None
 
-def play_episode(link):
+def get_direct_link(link):
     # Obtener todos los enlaces de video
     urls = get_url(link)
     if urls:
@@ -47,9 +46,8 @@ def play_episode(link):
                 # Ejecutar el extractor correspondiente
                 direct_url = extractor(url)
                 if direct_url:
-                    start_player(direct_url)  # Pasamos la URL directa a la función start_player
-                    return  # Devolver la URL directa y terminar el flujo de ejecución
+                    return direct_url  # Devolver la URL directa y terminar el flujo de ejecución
     print("No se pudo obtener el enlace directo.")  # Si no se encuentra ningún enlace directo
 
 if __name__ == "__main__":
-    play_episode("https://www3.animeflv.net/ver/a-channel-1")
+    get_direct_link("https://www3.animeflv.net/ver/a-channel-1")
