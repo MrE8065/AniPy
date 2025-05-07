@@ -3,6 +3,8 @@ name: Desktop Builds (Linux, macOS, Windows)
 on:
   # Allows you to run this workflow manually from the Actions tab of the repository
   workflow_dispatch:
+  branches:
+      - Flet-test
 
 env:
   # https://flet.dev/docs/publish#versioning
