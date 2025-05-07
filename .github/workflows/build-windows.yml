@@ -1,12 +1,23 @@
 name: Build and Release Flet App for Windows
 
 on:
-  workflow_dispatch:  # Permite ejecución manual desde GitHub UI
+  workflow_dispatch:
+    # Limita la ejecución manual a la rama Flet-test
+    inputs:
+      release_name:
+        description: 'Release name'
+        required: false
+        default: 'Manual Build'
+      tag_name:
+        description: 'Tag name (e.g. v1.0.0)'
+        required: false
+        default: 'manual-${{ github.run_number }}'
 
 jobs:
   build:
     name: Build Windows App
     runs-on: windows-latest
+    if: github.ref == 'refs/heads/Flet-test'
 
     steps:
       - name: Checkout repository
@@ -29,8 +40,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Manual Build ${{ github.run_number }}
-          tag_name: manual-${{ github.run_number }}
+          name: ${{ github.event.inputs.release_name }}
+          tag_name: ${{ github.event.inputs.tag_name }}
           files: FletApp.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
