@@ -1,5 +1,8 @@
 # AniPy
- Herramienta de Python para ver anime
+ Herramienta de Python para ver anime.
  
- > [!IMPORTANT]
- > NECESITAS TENER INSTALADO [VLC](https://www.videolan.org/vlc/) PARA QUE PUEDA REPRODUCIR LOS VIDEOS
+ **¡Ahora con interfaz gráfica!**
+
+> [!NOTE]
+> Ya no es necesario tener instalado VLC.
+
