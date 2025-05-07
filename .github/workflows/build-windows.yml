@@ -1,0 +1,36 @@
+name: Build and Release Flet App for Windows
+
+on:
+  workflow_dispatch:  # Permite ejecución manual desde GitHub UI
+
+jobs:
+  build:
+    name: Build Windows App
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Flet CLI
+        run: pip install flet
+
+      - name: Build Flet Windows App
+        run: flet build windows
+
+      - name: Archive Build Output
+        run: Compress-Archive -Path dist\windows\* -DestinationPath FletApp.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Manual Build ${{ github.run_number }}
+          tag_name: manual-${{ github.run_number }}
+          files: FletApp.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
